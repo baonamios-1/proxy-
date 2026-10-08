@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>IAM BODY FREE FIRE - RAINBOW</title>
+<style>
+  /* Định dạng toàn cục */
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: radial-gradient(circle at 50% 50%, #0d0d1a 0%, #000 100%);
+    color: #00ff88;
+    font-family: 'Courier New', monospace;
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+    overflow: hidden;
+  }
+
+  /* Khung viền cầu vồng động bao quanh container */
+  .rainbow-wrap {
+    position: relative;
+    padding: 4px;
+    border-radius: 14px;
+    background: linear-gradient(90deg,
+      #ff0000, #ff7f00, #ffff00, #00ff00,
+      #00ffff, #0000ff, #8b00ff, #ff0000);
+    background-size: 400% 400%;
+    animation: rainbowRun 3s linear infinite;
+    box-shadow: 0 0 25px rgba(0,255,136,0.4),
+                0 0 45px rgba(255,0,255,0.25);
+  }
+
+  /* Animation chạy màu cầu vồng quanh viền */
+  @keyframes rainbowRun {
+    0%   { background-position: 0% 50%; }
+    100% { background-position: 400% 50%; }
+  }
+
+  /* Lớp lấp lánh phủ trên viền */
+  .rainbow-wrap::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: 14px;
+    background: linear-gradient(90deg,
+      transparent 0%, rgba(255,255,255,0.8) 50%, transparent 100%);
+    background-size: 200% 100%;
+    animation: shineRun 2s linear infinite;
+    pointer-events: none;
+    mix-blend-mode: overlay;
+    opacity: 0.7;
+  }
+
+  @keyframes shineRun {
+    0%   { background-position: -100% 0; }
+    100% { background-position: 200% 0; }
+  }
+
+  /* Khung chứa chính */
+  .container {
+    background: #0e0e18;
+    border-radius: 10px;
+    padding: 28px 26px 24px;
+    max-width: 480px;
+    width: 100%;
+    position: relative;
+    z-index: 1;
+  }
+
+  /* Tiêu đề */
+  h1 {
+    text-align: center;
+    font-size: 19px;
+    margin-bottom: 22px;
+    letter-spacing: 2px;
+    background: linear-gradient(90deg,
+      #ff0000, #ff7f00, #ffff00, #00ff00, #00ffff, #0000ff, #8b00ff);
+    background-size: 300% 100%;
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    animation: rainbowRun 3s linear infinite;
+    text-shadow: 0 0 15px rgba(0,255,136,0.5);
+  }
+
+  /* Nhãn và ô nhập liệu */
+  label {
+    display: block;
+    margin-bottom: 6px;
+    font-size: 13px;
+    color: #00cc6a;
+    letter-spacing: 1px;
+  }
+
+  input, select {
+    width: 100%;
+    padding: 10px;
+    background: #050510;
+    border: 1px solid #00ff88;
+    color: #00ff88;
+    font-family: inherit;
+    border-radius: 6px;
+    margin-bottom: 14px;
+    outline: none;
+    transition: 0.25s;
+  }
+
+  input:focus, select:focus {
+    border-color: #ff00ff;
+    box-shadow: 0 0 12px rgba(255,0,255,0.6),
+                0 0 20px rgba(0,255,136,0.4);
+  }
+
+  /* Nút bấm */
+  button {
+    width: 100%;
+    padding: 13px;
+    background: linear-gradient(90deg,
+      #00ff88, #00ccff, #ff00ff, #00ff88);
+    background-size: 300% 100%;
+    color: #000;
+    border: none;
+    font-family: inherit;
+    font-weight: bold;
+    font-size: 14px;
+    letter-spacing: 1.5px;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: 0.25s;
+    animation: rainbowRun 4s linear infinite;
+    margin-top: 4px;
+  }
+
+  button:hover {
+    box-shadow: 0 0 20px #00ff88, 0 0 30px #ff00ff;
+    transform: translateY(-2px);
+  }
+
+  /* Khu vực kết quả */
+  #ketqua {
+    margin-top: 18px;
+    padding: 12px;
+    background: #050510;
+    border: 1px dashed #00ff88;
+    border-radius: 6px;
+    font-size: 13px;
+    white-space: pre-wrap;
+    word-break: break-all;
+    min-height: 60px;
+    color: #00ff88;
+  }
+
+  /* Trạng thái loading */
+  .loading { color: #ffaa00 !important; }
+
+  /* Trạng thái lỗi */
+  .error { color: #ff3333 !important; }
+
+  /* Trạng thái thành công */
+  .success { color: #00ff88 !important; }
+
+  /* Khối aimbot */
+  .aim-block {
+    border: 1px dashed #ff00ff;
+    border-radius: 6px;
+    padding: 12px;
+    margin-bottom: 14px;
+    background: rgba(255,0,255,0.05);
+  }
+
+  .aim-block h3 {
+    font-size: 12px;
+    color: #ff66ff;
+    margin-bottom: 10px;
+    letter-spacing: 1.5px;
+    text-align: center;
+  }
+
+  /* Công tắc bật/tắt dạng switch */
+  .switch-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+    font-size: 12px;
+    color: #00cc6a;
+  }
+
+  .switch {
+    position: relative;
+    width: 44px;
+    height: 22px;
+  }
+
+  .switch input { opacity: 0; width: 0; height: 0; }
+
+  .slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: #333;
+    border-radius: 22px;
+    transition: 0.3s;
+  }
+
+  .slider:before {
+    content: '';
+    position: absolute;
+    height: 16px; width: 16px;
+    left: 3px; bottom: 3px;
+    background: #888;
+    border-radius: 50%;
+    transition: 0.3s;
+  }
+
+  .switch input:checked + .slider {
+    background: linear-gradient(90deg, #00ff88, #00ffff);
+  }
+
+  .switch input:checked + .slider:before {
+    transform: translateX(22px);
+    background: #fff;
+    box-shadow: 0 0 8px #00ff88;
+  }
+</style>
+</head>
+<body>
+
+<div class="rainbow-wrap">
+  <div class="container">
+    <h1>[ IAM BODY FREE FIRE ]</h1>
+
+    <!-- Ô nhập ID tài khoản -->
+    <label for="uid">UID TÀI KHOẢN:</label>
+    <input type="text" id="uid" placeholder="Nhập UID Free Fire..." maxlength="12">
+
+    <!-- Chọn máy chủ -->
+    <label for="server">MÁY CHỦ:</label>
+    <select id="server">
+      <option value="vn">Việt Nam</option>
+      <option value="sg">Singapore</option>
+      <option value="id">Indonesia</option>
+      <option value="br">Brazil</option>
+      <option value="us">Hoa Kỳ</option>
+    </select>
+
+    <!-- Chọn chế độ IAM -->
+    <label for="mode">CHẾ ĐỘ IAM:</label>
+    <select id="mode">
+      <option value="body">IAM BODY</option>
+      <option value="head">IAM HEAD</option>
+      <option value="full">IAM FULL</option>
+    </select>
+
+    <!-- Khối chức năng đạn thẳng (aimbot) -->
+    <div class="aim-block">
+      <h3>⚡ CHỨC NĂNG ĐẠN THẲNG ⚡</h3>
+
+      <div class="switch-row">
+        <span>BẬT AIMBOT</span>
+        <label class="switch">
+          <input type="checkbox" id="aimOn">
+          <span class="slider"></span>
+        </label>
+      </div>
+
+      <label for="aimTarget">MỤC TIÊU KHÓA:</label>
+      <select id="aimTarget">
+        <option value="head">Đầu (Head)</option>
+        <option value="chest">Ngực (Chest)</option>
+        <option value="body">Toàn thân (Body)</option>
+      </select>
+
+      <label for="aimSpeed">TỐC ĐỘ KHÓA: <span id="speedVal">5</span></label>
+      <input type="range" id="aimSpeed" min="1" max="10" value="5" style="padding:0;height:6px;">
+
+      <div class="switch-row" style="margin-top:6px;">
+        <span>XUYÊN TƯỜNG</span>
+        <label class="switch">
+          <input type="checkbox" id="wallHack">
+          <span class="slider"></span>
+        </label>
+      </div>
+    </div>
+
+    <!-- Nút thực thi -->
+    <button onclick="thucThiIAM()">KÍCH HOẠT IAM</button>
+
+    <!-- Khu vực hiển thị kết quả -->
+    <div id="ketqua">Chờ lệnh...</div>
+  </div>
+</div>
+
+<script>
+/* Cập nhật giá trị hiển thị của thanh trượt tốc độ khóa */
+document.getElementById('aimSpeed').addEventListener('input', function() {
+  document.getElementById('speedVal').textContent = this.value;
+});
+
+/* Hàm xử lý chính khi người dùng nhấn nút */
+function thucThiIAM() {
+  /* Lấy giá trị từ các ô nhập liệu */
+  var uid = document.getElementById('uid').value.trim();
+  var server = document.getElementById('server').value;
+  var mode = document.getElementById('mode').value;
+  var aimOn = document.getElementById('aimOn').checked;
+  var aimTarget = document.getElementById('aimTarget').value;
+  var aimSpeed = document.getElementById('aimSpeed').value;
+  var wallHack = document.getElementById('wallHack').checked;
+  var ketqua = document.getElementById('ketqua');
+
+  /* Kiểm tra UID rỗng */
+  if (uid === '') {
+    ketqua.className = 'error';
+    ketqua.textContent = 'LỖI: UID không được để trống.';
+    return;
+  }
+
+  /* Kiểm tra UID chỉ chứa số */
+  if (!/^[0-9]+$/.test(uid)) {
+    ketqua.className = 'error';
+    ketqua.textContent = 'LỖI: UID chỉ được chứa ký tự số.';
+    return;
+  }
+
+  /* Kiểm tra độ dài UID từ 6 đến 12 ký tự */
+  if (uid.length < 6 || uid.length > 12) {
+    ketqua.className = 'error';
+    ketqua.textContent = 'LỖI: UID phải có độ dài từ 6 đến 12 ký tự.';
+    return;
+  }
+
+  /* Hiển thị trạng thái đang xử lý */
+  ketqua.className = 'loading';
+  ketqua.textContent = '[ ĐANG KẾT NỐI MÁY CHỦ... ]';
+
+  /* Mô phỏng quá trình gửi yêu cầu IAM theo từng giai đoạn */
+  setTimeout(function() {
+    ketqua.textContent = '[ ĐANG XÁC THỰC UID: ' + uid + ' ]';
+  }, 700);
+
+  setTimeout(function() {
+    ketqua.textContent = '[ ĐANG GỬI GÓI TIN IAM... ]';
+  }, 1400);
+
+  setTimeout(function() {
+    ketqua.textContent = '[ ĐANG TIÊM DỮ LIỆU VÀO BODY... ]';
+  }, 2100);
+
+  /* Nếu aimbot bật, hiển thị thêm giai đoạn khóa mục tiêu */
+  if (aimOn) {
+    setTimeout(function() {
+      ketqua.textContent = '[ ĐANG KÍCH HOẠT ĐẠN THẲNG → ' +
+        aimTarget.toUpperCase() + ' ]';
+    }, 2800);
+  }
+
+  /* Tạo kết quả cuối cùng sau khi hoàn tất mô phỏng */
+  setTimeout(function() {
+    var token = taoToken(uid, server);
+    var aimInfo = aimOn
+      ? ('AIMBOT: BẬT\n'
+         + 'MỤC TIÊU: ' + aimTarget.toUpperCase() + '\n'
+         + 'TỐC ĐỘ KHÓA: ' + aimSpeed + '/10\n'
+         + 'XUYÊN TƯỜNG: ' + (wallHack ? 'BẬT' : 'TẮT') + '\n')
+      : 'AIMBOT: TẮT\n';
+
+    var ketQuaCuoi = ''
+      + '=== KẾT QUẢ IAM ===\n'
+      + 'UID: ' + uid + '\n'
+      + 'MÁY CHỦ: ' + server.toUpperCase() + '\n'
+      + 'CHẾ ĐỘ: ' + mode.toUpperCase() + '\n'
+      + 'TOKEN: ' + token + '\n'
+      + '-------------------\n'
+      + aimInfo
+      + '-------------------\n'
+      + 'TRẠNG THÁI: THÀNH CÔNG\n'
+      + '===================';
+
+    ketqua.className = 'success';
+    ketqua.textContent = ketQuaCuoi;
+  }, aimOn ? 3600 : 3000);
+}
+
+/* Hàm tạo token giả lập từ UID và máy chủ */
+function taoToken(uid, server) {
+  var kyTu = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+  var token = '';
+  var hatGiong = uid + server;
+  for (var i = 0; i < 16; i++) {
+    var chiSo = (hatGiong.charCodeAt(i % hatGiong.length) + i * 7) % kyTu.length;
+    token += kyTu.charAt(chiSo);
+  }
+  return token;
+}
+</script>
+
+</body>
+</html>
